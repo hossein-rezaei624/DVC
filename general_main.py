@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # Commandline arguments
     parser = argparse.ArgumentParser(description="Online Continual Learning PyTorch")
     ########################General#########################
-    parser.add_argument('--num_runs', dest='num_runs', default=15, type=int,
+    parser.add_argument('--num_runs', dest='num_runs', default=1, type=int,
                         help='Number of runs (default: %(default)s)')
     parser.add_argument('--seed', dest='seed', default=0, type=int,
                         help='Random seed')
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_tasks', dest='num_tasks', default=10,
                         type=int,
                         help='Number of tasks (default: %(default)s), OpenLORIS num_tasks is predefined')
-    parser.add_argument('--fix_order', dest='fix_order', default=True,
+    parser.add_argument('--fix_order', dest='fix_order', default=False,
                         type=boolean_string,
                         help='In NC scenario, should the class order be fixed (default: %(default)s)')
     parser.add_argument('--plot_sample', dest='plot_sample', default=False,
@@ -136,7 +136,7 @@ if __name__ == "__main__":
                              ' "asv" - Use extremal values of Adversarial SV and Cooperative SV,'
                              ' "asvm" - Use mean values of Adversarial SV and Cooperative SV')
 
-    parser.add_argument('--n_smp_cls', dest='n_smp_cls', default=1.0,
+    parser.add_argument('--n_smp_cls', dest='n_smp_cls', default=2.0,
                         type=float,
                         help='Maximum number of samples per class for random sampling (default: %(default)s)')
 

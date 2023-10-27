@@ -51,7 +51,7 @@ class dataset_transform(data.Dataset):
         else:
             x = self.x[idx]
 
-        return x.float(), self.y[idx]
+        return x.float(), self.y[idx], idx
 
 
 def setup_test_loader(test_data, params):

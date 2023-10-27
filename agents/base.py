@@ -153,7 +153,7 @@ class ContinualLearner(torch.nn.Module, metaclass=abc.ABCMeta):
                 predict_lb = []
             for task, test_loader in enumerate(test_loaders):
                 acc = AverageMeter()
-                for i, (batch_x, batch_y) in enumerate(test_loader):
+                for i, (batch_x, batch_y, indices_1) in enumerate(test_loader):
                     batch_x = maybe_cuda(batch_x, self.cuda)
                     batch_y = maybe_cuda(batch_y, self.cuda)
                     if self.params.trick['ncm_trick'] or self.params.agent in ['ICARL',  'SCP']:

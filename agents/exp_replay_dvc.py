@@ -129,12 +129,12 @@ class ExperienceReplay_DVC(ContinualLearner):
 
 
         # Initializing the dictionaries        
-        confidence_by_class = {class_id: {epoch: [] for epoch in range(8)} for class_id, __ in enumerate(unique_classes)}
+        confidence_by_class = {class_id: {epoch: [] for epoch in range(4)} for class_id, __ in enumerate(unique_classes)}
 
         
         # Training
-        Carto = torch.zeros((8, len(y_train)))
-        for epoch_ in range(8):
+        Carto = torch.zeros((4, len(y_train)))
+        for epoch_ in range(4):
             print('\nEpoch: %d' % epoch_)
             Model_Carto.train()
             train_loss = 0
@@ -174,7 +174,7 @@ class ExperienceReplay_DVC(ContinualLearner):
             scheduler_.step()
 
         mean_by_class = {class_id: {epoch: torch.mean(torch.tensor(confidences[epoch])) for epoch in confidences} for class_id, confidences in confidence_by_class.items()}
-        std_of_means_by_class = {class_id: torch.std(torch.tensor([mean_by_class[class_id][epoch] for epoch in range(8)])) for class_id, __ in enumerate(unique_classes)}
+        std_of_means_by_class = {class_id: torch.std(torch.tensor([mean_by_class[class_id][epoch] for epoch in range(4)])) for class_id, __ in enumerate(unique_classes)}
         
         ##print("std_of_means_by_class", std_of_means_by_class)
 

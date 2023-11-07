@@ -305,9 +305,9 @@ class ExperienceReplay_DVC(ContinualLearner):
 
         ##top_indices_sorted = sorted_indices_1 #hard to learn
         
-        ##top_indices_sorted = sorted_indices_1[::-1] #easy to learn
+        top_indices_sorted = sorted_indices_1[::-1] #easy to learn
 
-        top_indices_sorted = sorted_indices_2[::-1] #ambiguous
+        ##top_indices_sorted = sorted_indices_2[::-1] #ambiguous
 
         
         subset_data = torch.utils.data.Subset(train_dataset, top_indices_sorted)

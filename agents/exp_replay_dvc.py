@@ -22,6 +22,9 @@ import math
 from torch.utils.data import Dataset
 import pickle
 
+from collections import defaultdict
+from torch.utils.data import Subset
+
 
 class ExperienceReplay_DVC(ContinualLearner):
     def __init__(self, model, opt, params):

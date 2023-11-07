@@ -173,7 +173,7 @@ class ExperienceReplay_DVC(ContinualLearner):
             scheduler_.step()
 
         mean_by_class = {class_id: {epoch: torch.mean(torch.tensor(confidences[epoch])) for epoch in confidences} for class_id, confidences in confidence_by_class.items()}
-        std_of_means_by_class = {class_id: torch.std(torch.tensor([mean_by_class[class_id][epoch] for epoch in range(8)])) for class_id, __ in enumerate(unique_classes)}
+        std_of_means_by_class = {class_id: torch.mean(torch.tensor([mean_by_class[class_id][epoch] for epoch in range(8)])) for class_id, __ in enumerate(unique_classes)}
         
         ##print("std_of_means_by_class", std_of_means_by_class)
 
@@ -303,11 +303,11 @@ class ExperienceReplay_DVC(ContinualLearner):
         #top_indices_sorted = top_indices_1[::-1] #ambiguous
 
 
-        top_indices_sorted = sorted_indices_1 #hard to learn
+        ##top_indices_sorted = sorted_indices_1 #hard to learn
         
         ##top_indices_sorted = sorted_indices_1[::-1] #easy to learn
 
-        ##top_indices_sorted = sorted_indices_2[::-1] #ambiguous
+        top_indices_sorted = sorted_indices_2[::-1] #ambiguous
 
         
         subset_data = torch.utils.data.Subset(train_dataset, top_indices_sorted)

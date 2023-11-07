@@ -173,19 +173,7 @@ class ExperienceReplay_DVC(ContinualLearner):
             scheduler_.step()
 
         mean_by_class = {class_id: {epoch: torch.mean(torch.tensor(confidences[epoch])) for epoch in confidences} for class_id, confidences in confidence_by_class.items()}
-        std_of_means_by_class = {class_id: torch.mean(torch.tensor([mean_by_class[class_id][epoch] for epoch in range(8)])) for class_id, __ in enumerate(unique_classes)}
-        
-        ##print("std_of_means_by_class", std_of_means_by_class)
-
-        Confidence_mean = Carto.mean(dim=0)
-        Variability = Carto.std(dim=0)
-        
-        ##plt.scatter(Variability, Confidence_mean, s = 2)
-        
-        ##plt.xlabel("Variability") 
-        ##plt.ylabel("Confidence") 
-        
-        ##plt.savefig('scatter_plot.png')
+        std_of_means_by_class = {class_id: torch.std(torch.tensor([mean_by_class[class_id][epoch] for epoch in range(8)])) for class_id, __ in enumerate(unique_classes)}
         
         
         # set up model
@@ -289,42 +277,9 @@ class ExperienceReplay_DVC(ContinualLearner):
 
         top_n = counter__
 
-        # Find the indices that would sort the array
-        sorted_indices_1 = np.argsort(Confidence_mean.numpy())
-        sorted_indices_2 = np.argsort(Variability.numpy())
-        
-        #top_indices_1 = sorted_indices_1[:top_n] #hard to learn
-        #top_indices_sorted = top_indices_1 #hard to learn
-        
-        #top_indices_1 = sorted_indices_1[-top_n:] #easy to learn
-        #top_indices_sorted = top_indices_1[::-1] #easy to learn
-        
-        #top_indices_1 = sorted_indices_2[-top_n:] #ambigiuous
-        #top_indices_sorted = top_indices_1[::-1] #ambiguous
 
 
-        top_indices_sorted = sorted_indices_1 #hard to learn
-        
-        ##top_indices_sorted = sorted_indices_1[::-1] #easy to learn
-
-        ##top_indices_sorted = sorted_indices_2[::-1] #ambiguous
-
-        
-        subset_data = torch.utils.data.Subset(train_dataset, top_indices_sorted)
-        trainloader_C = torch.utils.data.DataLoader(subset_data, batch_size=self.batch, shuffle=False, num_workers=0)
-
-        images_list = []
-        labels_list = []
-        
-        for images, labels, indices_1 in trainloader_C:  # Assuming train_loader is your DataLoader
-            images_list.append(images)
-            labels_list.append(labels)
-        
-        all_images = torch.cat(images_list, dim=0)
-        all_labels = torch.cat(labels_list, dim=0)
-
-
-        updated_std_of_means_by_class = {k: 1 - v.item() for k, v in std_of_means_by_class.items()}
+        updated_std_of_means_by_class = {k: v.item() for k, v in std_of_means_by_class.items()}
         
         ##print("updated_std_of_means_by_class", updated_std_of_means_by_class)
 
@@ -353,30 +308,34 @@ class ExperienceReplay_DVC(ContinualLearner):
                 break
 
         
-        ##print("condition", condition, sum(condition), "top_n", top_n)
-        images_list_ = []
-        labels_list_ = []
-        
-        for i in range(all_labels.shape[0]):
-            if counter_class[mapping[all_labels[i].item()]] < condition[mapping[all_labels[i].item()]]:
-                counter_class[mapping[all_labels[i].item()]] += 1
-                labels_list_.append(all_labels[i])
-                images_list_.append(all_images[i])
-            if counter_class == condition:
-                ##print("yesssss")
-                break
+        #here
 
-        
-        all_images_ = torch.stack(images_list_)
-        all_labels_ = torch.stack(labels_list_)
+        class_indices = defaultdict(list)
+        for idx, (_, label, __) in enumerate(train_dataset):
+            class_indices[label.item()].append(idx)
 
-        indices = torch.randperm(all_images_.size(0))
-        shuffled_images = all_images_[indices]
-        shuffled_labels = all_labels_[indices]
-        ##print("shuffled_labels.shape", shuffled_labels.shape)
+        selected_indices = []
+
+        for class_id, num_samples in enumerate(condition):
+            class_samples = class_indices[reverse_mapping[class_id]]  # get indices for the class
+            selected_for_class = random.sample(class_samples, num_samples)
+            selected_indices.extend(selected_for_class)
+
+        selected_dataset = Subset(train_dataset, selected_indices)
+        trainloader_C = torch.utils.data.DataLoader(selected_dataset, batch_size=self.batch, shuffle=True, num_workers=0)
+
+        images_list = []
+        labels_list = []
         
-        self.buffer.buffer_label[list_of_indices] = shuffled_labels.to(device)
-        self.buffer.buffer_img[list_of_indices] = shuffled_images.to(device)
+        for images, labels, indices_1 in trainloader_C:  # Assuming train_loader is your DataLoader
+            images_list.append(images)
+            labels_list.append(labels)
+        
+        all_images = torch.cat(images_list, dim=0)
+        all_labels = torch.cat(labels_list, dim=0)
+
+        self.buffer.buffer_label[list_of_indices] = all_labels.to(device)
+        self.buffer.buffer_img[list_of_indices] = all_images.to(device)
         
         
         self.after_train()

@@ -123,7 +123,7 @@ class ContinualLearner(torch.nn.Module, metaclass=abc.ABCMeta):
         self.model.eval()
         acc_array = np.zeros(len(test_loaders))
         acc_array_augmented = np.zeros(len(test_loaders))
-        if self.params.trick['ncm_trick'] or self.params.agent in ['ICARL', 'SCR', 'SCP']:
+        if self.params.trick['ncm_trick'] or self.params.agent in ['ICARL', 'SCP']:
             exemplar_means = {}
             cls_exemplar = {cls: [] for cls in self.old_labels}
             buffer_filled = self.buffer.current_index
@@ -187,10 +187,10 @@ class ContinualLearner(torch.nn.Module, metaclass=abc.ABCMeta):
                     else:
                     
                         if self.agent == 'ER_DVC':
-                                y = self.model(batch_x,batch_x)
-                                logits,_,_,_ = y
-                                _, pred_label = torch.max(logits, 1)
-                                correct_cnt = (pred_label == batch_y).sum().item()/batch_y.size(0)
+                            y = self.model(batch_x,batch_x)
+                            logits,_,_,_ = y
+                            _, pred_label = torch.max(logits, 1)
+                            correct_cnt = (pred_label == batch_y).sum().item()/batch_y.size(0)
                         
                             if task_num == 9:
                             
@@ -262,10 +262,10 @@ class ContinualLearner(torch.nn.Module, metaclass=abc.ABCMeta):
                         
                         
                         else:
-                                y = self.model(batch_x)
-                                logits,_ = y
-                                _, pred_label = torch.max(logits, 1)
-                                correct_cnt = (pred_label == batch_y).sum().item()/batch_y.size(0)
+                            y = self.model(batch_x)
+                            logits,_ = y
+                            _, pred_label = torch.max(logits, 1)
+                            correct_cnt = (pred_label == batch_y).sum().item()/batch_y.size(0)
 
                     
 

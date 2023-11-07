@@ -10,15 +10,14 @@ from torchvision.transforms import RandomResizedCrop, RandomHorizontalFlip, Colo
 from loss import agmax_loss, cross_entropy_loss
 
 from models.resnet1 import ResNet18
+import numpy as np
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.utils.data import ConcatDataset
+import random
 import torchvision.transforms as transforms
 import torchvision
 import math
-
-import numpy as np
-import random
 
 from torch.utils.data import Dataset
 import pickle
@@ -64,7 +63,7 @@ class ExperienceReplay_DVC(ContinualLearner):
             if discrepancy > 0:
                 samples[key] += 1
                 discrepancy -= 1
-            else:
+            elif discrepancy < 0 and samples[key] > 0:
                 samples[key] -= 1
                 discrepancy += 1
 
@@ -129,12 +128,12 @@ class ExperienceReplay_DVC(ContinualLearner):
 
 
         # Initializing the dictionaries        
-        confidence_by_class = {class_id: {epoch: [] for epoch in range(4)} for class_id, __ in enumerate(unique_classes)}
+        confidence_by_class = {class_id: {epoch: [] for epoch in range(8)} for class_id, __ in enumerate(unique_classes)}
 
         
         # Training
-        Carto = torch.zeros((4, len(y_train)))
-        for epoch_ in range(4):
+        Carto = torch.zeros((8, len(y_train)))
+        for epoch_ in range(8):
             print('\nEpoch: %d' % epoch_)
             Model_Carto.train()
             train_loss = 0
@@ -174,7 +173,7 @@ class ExperienceReplay_DVC(ContinualLearner):
             scheduler_.step()
 
         mean_by_class = {class_id: {epoch: torch.mean(torch.tensor(confidences[epoch])) for epoch in confidences} for class_id, confidences in confidence_by_class.items()}
-        std_of_means_by_class = {class_id: torch.std(torch.tensor([mean_by_class[class_id][epoch] for epoch in range(4)])) for class_id, __ in enumerate(unique_classes)}
+        std_of_means_by_class = {class_id: torch.std(torch.tensor([mean_by_class[class_id][epoch] for epoch in range(8)])) for class_id, __ in enumerate(unique_classes)}
         
         ##print("std_of_means_by_class", std_of_means_by_class)
 

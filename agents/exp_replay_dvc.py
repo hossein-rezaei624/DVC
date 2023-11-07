@@ -303,11 +303,11 @@ class ExperienceReplay_DVC(ContinualLearner):
         #top_indices_sorted = top_indices_1[::-1] #ambiguous
 
 
-        top_indices_sorted = sorted_indices_1 #hard to learn
+        ##top_indices_sorted = sorted_indices_1 #hard to learn
         
         ##top_indices_sorted = sorted_indices_1[::-1] #easy to learn
 
-        ##top_indices_sorted = sorted_indices_2[::-1] #ambiguous
+        top_indices_sorted = sorted_indices_2[::-1] #ambiguous
 
         
         subset_data = torch.utils.data.Subset(train_dataset, top_indices_sorted)
@@ -324,7 +324,7 @@ class ExperienceReplay_DVC(ContinualLearner):
         all_labels = torch.cat(labels_list, dim=0)
 
 
-        updated_std_of_means_by_class = {k: v.item() for k, v in std_of_means_by_class.items()}
+        updated_std_of_means_by_class = {k: 1 - v.item() for k, v in std_of_means_by_class.items()}
         
         ##print("updated_std_of_means_by_class", updated_std_of_means_by_class)
 

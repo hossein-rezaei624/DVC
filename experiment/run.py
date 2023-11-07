@@ -31,8 +31,10 @@ def multiple_run(params, store=False, save_path=None):
             save_path = params.model_name + '_' + params.data_name + '.pkl'
 
     accuracy_list = []
+    accuracy_list_augmented = []
     for run in range(params.num_runs):
         tmp_acc = []
+        tmp_acc_augmented = []
         run_start = time.time()
         data_continuum.new_run()
         model = setup_architecture(params)
@@ -47,13 +49,22 @@ def multiple_run(params, store=False, save_path=None):
                 print("-----------run {} training batch {}-------------".format(run, i))
                 print('size: {}, {}'.format(x_train.shape, y_train.shape))
                 agent.train_learner(x_train, y_train)
-                acc_array = agent.evaluate(test_loaders)
+                if i == 9:
+                    acc_array, acc_array_augmented = agent.evaluate(test_loaders, i)
+                else:
+                    acc_array = agent.evaluate(test_loaders, i)
                 tmp_acc.append(acc_array)
+                if i == 9:
+                    tmp_acc_augmented.append(acc_array_augmented)
             run_end = time.time()
             print(
                 "-----------run {}-----------avg_end_acc {}-----------train time {}".format(run, np.mean(tmp_acc[-1]),
                                                                                run_end - run_start))
+            if i == 9:
+                print("-----------run {}-----------avg_end_acc_augmented {}-----------train time {}".format(run, np.mean(tmp_acc_augmented[-1]), run_end - run_start))
             accuracy_list.append(np.array(tmp_acc))
+            if i == 9:
+                accuracy_list_augmented.append(np.array(tmp_acc_augmented))
         else:
             x_train_offline = []
             y_train_offline = []
@@ -70,6 +81,7 @@ def multiple_run(params, store=False, save_path=None):
             accuracy_list.append(acc_array)
 
     accuracy_array = np.array(accuracy_list)
+    accuracy_array_augmented = np.array(accuracy_list_augmented)
     end = time.time()
     if store:
         result = {'time': end - start}
@@ -79,9 +91,12 @@ def multiple_run(params, store=False, save_path=None):
         save_file.close()
     if params.online:
         avg_end_acc, avg_end_fgt, avg_acc, avg_bwtp, avg_fwt = compute_performance(accuracy_array)
+        avg_end_acc_augmented, avg_end_fgt_augmented, avg_acc_augmented, avg_bwtp_augmented, avg_fwt_augmented = compute_performance(accuracy_array_augmented)
         print('----------- Total {} run: {}s -----------'.format(params.num_runs, end - start))
         print('----------- Avg_End_Acc {} Avg_End_Fgt {} Avg_Acc {} Avg_Bwtp {} Avg_Fwt {}-----------'
               .format(avg_end_acc, avg_end_fgt, avg_acc, avg_bwtp, avg_fwt))
+        print('----------- Avg_End_Acc_augmented {} Avg_End_Fgt_augmented {} Avg_Acc_augmented {} Avg_Bwtp_augmented {} Avg_Fwt_augmented {}-----------'
+              .format(avg_end_acc_augmented, avg_end_fgt_augmented, avg_acc_augmented, avg_bwtp_augmented, avg_fwt_augmented))
     else:
         print('----------- Total {} run: {}s -----------'.format(params.num_runs, end - start))
         print("avg_end_acc {}".format(np.mean(accuracy_list)))
@@ -373,5 +388,3 @@ def single_tune_train_val(data_continuum, default_params, tune_params, params_ke
         agent.train_learner(x_train_offline, y_train_offline)
         acc_array = agent.evaluate(test_loaders_full)
         tmp_acc.append(acc_array)
-
-

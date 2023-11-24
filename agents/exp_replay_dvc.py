@@ -10,7 +10,7 @@ from torchvision.transforms import RandomResizedCrop, RandomHorizontalFlip, Colo
 from loss import agmax_loss, cross_entropy_loss
 
 import torch.nn as nn
-from models.resnet import ResNet18
+from models.resnet1 import ResNet18
 import numpy as np
 import torch.optim as optim
 import matplotlib.pyplot as plt
